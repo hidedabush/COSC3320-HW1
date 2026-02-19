@@ -13,27 +13,48 @@ class Points:
         self.num = 10
 
     def generate(self, num):
-        # we have a 1000*1000 and there is num = number of grids for each point, so we can divide 1000*1000 into num*num grid to find the x and y 
-        x, y = 1000*1000/num/num, 1000*1000/num/num
-        d = 1000/y
-        i,j = 0,0
-
-        xtimes, ytimes = 1,1
-
-        while i < d:
-            while j < d:
-                self.points.append((uniform(j, x*xtimes), uniform(i, y*ytimes)))
-                j += x
-                ytimes += 1
-            i += y
-            j = 0
-            xtimes += 1
-
-       
+        self.num = num
+        self.points = []
         
-        #
-        # *** This needs to be improved to make it interesting ***
-        #
+        # Grid settings: cell size is 5 because we want 5 units of clearance
+        cell_size = 5
+        grid = {} # Dictionary to store points by their grid cell coordinates
+        
+        max_attempts_per_point = 100
+        
+        while len(self.points) < num:
+            # 1. Generate a candidate point
+            px, py = uniform(0, 1000), uniform(0, 1000)
+            
+            # 2. Determine which grid cell this point falls into
+            gx, gy = int(px // cell_size), int(py // cell_size)
+            
+            # 3. Check the candidate against existing points in the 9 nearby cells
+            is_safe = True
+            
+            # We check the current cell (gx, gy) and all 8 neighbors
+            for i in range(gx - 1, gx + 2):
+                for j in range(gy - 1, gy + 2):
+                    if (i, j) in grid:
+                        other_p = grid[(i, j)]
+                        # Check absolute difference for both X and Y
+                        if abs(px - other_p[0]) < 5 and abs(py - other_p[1]) < 5:
+                            is_safe = False
+                            break
+                if not is_safe:
+                    break
+            
+            # 4. If no neighbors are too close, add the point
+            if is_safe:
+                self.points.append((px, py))
+                grid[(gx, gy)] = (px, py)
+            
+            # Safety check: if the grid is physically too full to find a spot, 
+            # we stop to prevent an infinite loop.
+            max_attempts_per_point -= 1
+            if max_attempts_per_point < -1000: # Broad limit for the whole generation
+                print("Warning: Could not place all points due to space constraints.")
+                break
     def get_points(self):
         return self.points
     
