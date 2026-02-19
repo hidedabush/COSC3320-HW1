@@ -13,11 +13,23 @@ class Points:
         self.num = 10
 
     def generate(self, num):
-        self.num = num
-        man_dist = 5
+        # we have a 1000*1000 and there is num = number of grids for each point, so we can divide 1000*1000 into num*num grid to find the x and y 
+        x, y = 1000*1000/num/num, 1000*1000/num/num
+        d = 1000/y
+        i,j = 0,0
 
+        xtimes, ytimes = 1,1
 
-        self.points = [(uniform(0, 1000), uniform(0, 1000)) for _ in range(num)]
+        while i < d:
+            while j < d:
+                self.points.append((uniform(j, x*xtimes), uniform(i, y*ytimes)))
+                j += x
+                ytimes += 1
+            i += y
+            j = 0
+            xtimes += 1
+
+       
         
         #
         # *** This needs to be improved to make it interesting ***
@@ -154,6 +166,8 @@ class App:
         self.draw_points()
 
     def generate(self):
+
+
         num = self.slider.get()
         self.points.generate(num)
         self.draw_points()
